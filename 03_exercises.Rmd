@@ -1,6 +1,6 @@
 ---
 title: 'Weekly Exercises #3'
-author: "Put your name here"
+author: "Audrey Smyczek"
 output: 
   html_document:
     keep_md: TRUE
@@ -79,35 +79,59 @@ Before starting your assignment, you need to get yourself set up on GitHub and m
 These exercises will reiterate what you learned in the "Expanding the data wrangling toolkit" tutorial. If you haven't gone through the tutorial yet, you should do that first.
 
   1. Summarize the `garden_harvest` data to find the total harvest weight in pounds for each vegetable and day of week (HINT: use the `wday()` function from `lubridate`). Display the results so that the vegetables are rows but the days of the week are columns.
+  
+NEED TO CHANGE ORIENTATION
 
 ```{r}
-
+garden_harvest %>% 
+  select(`vegetable`, `weight`, `date`) %>% 
+  mutate(day = wday(date, label = TRUE)) %>% 
+  group_by(`day`, `vegetable`) %>% 
+  summarise(wgt = max(cumsum(weight)))
+  # pivot_wider(id_cols = `day`)
 ```
 
   2. Summarize the `garden_harvest` data to find the total harvest in pound for each vegetable variety and then try adding the plot from the `garden_planting` table. This will not turn out perfectly. What is the problem? How might you fix it?
 
+NEED TO ADD TO TABLE
 ```{r}
+garden_harvest %>% 
+  group_by(`variety`, `vegetable`) %>% 
+  summarise(cum_lbs = max(cumsum(weight) * 0.00220462))
 
 ```
 
   3. I would like to understand how much money I "saved" by gardening, for each vegetable type. Describe how I could use the `garden_harvest` and `garden_spending` datasets, along with data from somewhere like [this](https://products.wholefoodsmarket.com/search?sort=relevance&store=10542) to answer this question. You can answer this in words, referencing various join functions. You don't need R code but could provide some if it's helpful.
+  
+DO THIS
 
   4. Subset the data to tomatoes. Reorder the tomato varieties from smallest to largest first harvest date. Create a barplot of total harvest in pounds for each variety, in the new order.CHALLENGE: add the date near the end of the bar. (This is probably not a super useful graph because it's difficult to read. This is more an exercise in using some of the functions you just learned.)
+  
+DON'T KNOW ORDER_BY
 
 ```{r}
-
+garden_harvest %>% 
+  filter(vegetable == "tomatoes") %>% 
+  order_by(variety)
 ```
 
   5. In the `garden_harvest` data, create two new variables: one that makes the varieties lowercase and another that finds the length of the variety name. Arrange the data by vegetable and length of variety name (smallest to largest), with one row for each vegetable variety. HINT: use `str_to_lower()`, `str_length()`, and `distinct()`.
   
 ```{r}
-
+garden_harvest %>% 
+  mutate(lowercase = str_to_lower(variety),
+         len = str_length(variety)) %>% 
+  distinct(`variety`, `vegetable`, `len`) %>% 
+  arrange(`len`, `vegetable`)
 ```
 
   6. In the `garden_harvest` data, find all distinct vegetable varieties that have "er" or "ar" in their name. HINT: `str_detect()` with an "or" statement (use the | for "or") and `distinct()`.
+  
+NEED TO GET DATA FROM SET
 
 ```{r}
-
+garden_harvest %>% 
+  str_detect(`variety`, "er|ar")
 ```
 
 
@@ -147,25 +171,42 @@ It's natural to expect that bikes are rented more at some times of day, some day
   7. A density plot, which is a smoothed out histogram, of the events versus `sdate`. Use `geom_density()`.
   
 ```{r}
-
+Trips %>% 
+  ggplot(aes(x = sdate))+
+  geom_density()+
+  ylab("events")
 ```
   
   8. A density plot of the events versus time of day.  You can use `mutate()` with `lubridate`'s  `hour()` and `minute()` functions to extract the hour of the day and minute within the hour from `sdate`. Hint: A minute is 1/60 of an hour, so create a variable where 3:30 is 3.5 and 3:45 is 3.75.
   
 ```{r}
-
+Trips %>% 
+  mutate(timeOfDay = hour(sdate) + (minute(sdate) * (1/60))) %>% 
+  ggplot()+
+  geom_density(aes(x = timeOfDay))
 ```
   
   9. A bar graph of the events versus day of the week. Put day on the y-axis.
   
 ```{r}
-
+Trips %>% 
+  mutate(day = wday(sdate, label = TRUE)) %>% 
+  ggplot(aes(y=day))+
+  geom_bar()
+  
 ```
   
   10. Facet your graph from exercise 8. by day of the week. Is there a pattern?
   
+CONFUSION! FACET?
+  
 ```{r}
-
+Trips %>% 
+  mutate(timeOfDay = hour(sdate) + (minute(sdate) * (1/60)),
+         dayOfWeek = wday(sdate, label = TRUE)) %>% 
+  ggplot()+
+  geom_density(aes(x = timeOfDay))+
+  facet_grid()
 ```
   
 The variable `client` describes whether the renter is a regular user (level `Registered`) or has not joined the bike-rental organization (`Causal`). The next set of exercises investigate whether these two different categories of users show different rental behavior and how `client` interacts with the patterns you found in the previous exercises. 
