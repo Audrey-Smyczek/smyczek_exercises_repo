@@ -80,15 +80,16 @@ These exercises will reiterate what you learned in the "Expanding the data wrang
 
   1. Summarize the `garden_harvest` data to find the total harvest weight in pounds for each vegetable and day of week (HINT: use the `wday()` function from `lubridate`). Display the results so that the vegetables are rows but the days of the week are columns.
   
-NEED TO CHANGE ORIENTATION
-
+  
 ```{r}
 garden_harvest %>% 
   select(`vegetable`, `weight`, `date`) %>% 
   mutate(day = wday(date, label = TRUE)) %>% 
   group_by(`day`, `vegetable`) %>% 
   summarise(wgt = max(cumsum(weight))) %>% 
-  pivot_wider(id_cols = `day`)
+  pivot_wider(id_cols = `vegetable`,
+              names_from = `day`,
+              values_from = `wgt`)
 ```
 
   2. Summarize the `garden_harvest` data to find the total harvest in pound for each vegetable variety and then try adding the plot from the `garden_planting` table. This will not turn out perfectly. What is the problem? How might you fix it?
@@ -112,7 +113,7 @@ DON'T KNOW ORDER_BY
 ```{r}
 garden_harvest %>% 
   filter(vegetable == "tomatoes") %>% 
-  order_by(~variety)
+  distinct(`variety`, `date`)
 ```
 
   5. In the `garden_harvest` data, create two new variables: one that makes the varieties lowercase and another that finds the length of the variety name. Arrange the data by vegetable and length of variety name (smallest to largest), with one row for each vegetable variety. HINT: use `str_to_lower()`, `str_length()`, and `distinct()`.
@@ -330,6 +331,8 @@ breed_traits_total %>%
 
   18. The final product of this exercise will be a graph with the top-20 dogs in total ratings (from previous problem) on the y-axis, year on the x-axis, and points colored by each breed's ranking for that year (from the `breed_rank_all` dataset). The points within each breed will be connected by a line, and the breeds should be arranged from the highest median rank to lowest median rank ("highest" is actually the smallest numer, eg. 1 = best). After you're finished, think of AT LEAST one thing you could you do to make this graph better. HINTS: 1. Start with the `breed_rank_all` dataset and pivot it so year is a variable. 2. Use the `separate()` function to get year alone, and there's an extra argument in that function that can make it numeric. 3. For both datasets used, you'll need to `str_squish()` Breed before joining. 
   
+  JOINING
+  
 ```{r}
 breed_rank_all %>% 
   pivot_longer(cols= starts_with("20"),
@@ -337,7 +340,7 @@ breed_rank_all %>%
                values_to = "ranking") %>% 
   separate(year,
            c("year"),
-           convert = TRUE) %>% 
+           convert = TRUE) 
   
 ```
   
