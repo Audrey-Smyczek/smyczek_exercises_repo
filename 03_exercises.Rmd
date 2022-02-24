@@ -106,14 +106,19 @@ garden_harvest %>%
   
 DO THIS
 
-  4. Subset the data to tomatoes. Reorder the tomato varieties from smallest to largest first harvest date. Create a barplot of total harvest in pounds for each variety, in the new order.CHALLENGE: add the date near the end of the bar. (This is probably not a super useful graph because it's difficult to read. This is more an exercise in using some of the functions you just learned.)
+  4. Subset the data to tomatoes. Reorder the tomato varieties from smallest to largest first harvest date. Create a barplot of total harvest in pounds for each variety, in the new order. CHALLENGE: add the date near the end of the bar. (This is probably not a super useful graph because it's difficult to read. This is more an exercise in using some of the functions you just learned.)
   
-DON'T KNOW ORDER_BY
+Put in lbs, use geom_col, put weight on x, variety on y
 
 ```{r}
 garden_harvest %>% 
   filter(vegetable == "tomatoes") %>% 
-  distinct(`variety`, `date`)
+  group_by(`variety`) %>% 
+  summarise(date = min(`date`),
+            sum_weight = sum(weight)) %>% 
+  ggplot(aes(x=`sum_weight`, fill = `variety`))+
+  geom_bar()
+
 ```
 
   5. In the `garden_harvest` data, create two new variables: one that makes the varieties lowercase and another that finds the length of the variety name. Arrange the data by vegetable and length of variety name (smallest to largest), with one row for each vegetable variety. HINT: use `str_to_lower()`, `str_length()`, and `distinct()`.
@@ -300,13 +305,29 @@ Trips %>%
   15. Use the latitude and longitude variables in `Stations` to make a visualization of the total number of departures from each station in the `Trips` data. Use either color or size to show the variation in number of departures. We will improve this plot next week when we learn about maps!
   
 ```{r}
+Small_Trips <- Trips %>% 
+  group_by(`sstation`) %>% 
+  summarise(num_departures = n()) %>% 
+  ungroup()
 
+Small_Trips %>% 
+  left_join(Stations,
+            by = c("sstation"="name")) %>% 
+  select(`sstation`, `lat`, `long`, `num_departures`) %>% 
+  ggplot()+
+  geom_point(mapping = aes(x = `lat`, 
+                           y = `long`,
+                           color = `num_departures`))
 ```
   
   16. Only 14.4% of the trips in our data are carried out by casual users. Create a plot that shows which area(s) have stations with a much higher percentage of departures by casual users. What patterns do you notice? (Again, we'll improve this next week when we learn about maps).
   
+  Use ratios
+  
 ```{r}
-
+Trips %>% 
+  group_by(`sstation`) %>% 
+  summarise()
 ```
   
 **DID YOU REMEMBER TO GO BACK AND CHANGE THIS SET OF EXERCISES TO THE LARGER DATASET? IF NOT, DO THAT NOW.**
@@ -331,6 +352,7 @@ breed_traits_total %>%
 
   18. The final product of this exercise will be a graph with the top-20 dogs in total ratings (from previous problem) on the y-axis, year on the x-axis, and points colored by each breed's ranking for that year (from the `breed_rank_all` dataset). The points within each breed will be connected by a line, and the breeds should be arranged from the highest median rank to lowest median rank ("highest" is actually the smallest numer, eg. 1 = best). After you're finished, think of AT LEAST one thing you could you do to make this graph better. HINTS: 1. Start with the `breed_rank_all` dataset and pivot it so year is a variable. 2. Use the `separate()` function to get year alone, and there's an extra argument in that function that can make it numeric. 3. For both datasets used, you'll need to `str_squish()` Breed before joining. 
   
+  Make it only 20
   JOINING
   
 ```{r}
