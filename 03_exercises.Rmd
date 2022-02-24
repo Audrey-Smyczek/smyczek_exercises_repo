@@ -279,8 +279,19 @@ Trips %>%
   
   14. Change the graph from the previous problem to facet on `client` and fill with `weekday`. What information does this graph tell you that the previous didn't? Is one graph better than the other?
   
+This graph doesn't tell us any information that the previous graph didn't however it is formatted differently which allows the reader to compare the information differently. I don't believe that one graph is better than another, it really depends on the information and comparisons that the reader is hoping to make. If the reader wants to compare casual and registered users this graph is more helpful however if the reader wants to compare weekday and weekend rides, the previous graph is better.
+  
 ```{r}
-
+Trips %>% 
+  mutate(timeOfDay = hour(sdate) + (minute(sdate) * (1/60)),
+         dayOfWeek = wday(sdate, label = TRUE),
+         weekend = ifelse(wday(sdate) == 1 | wday(sdate) == 7, "weekend", "weekday")) %>% 
+  ggplot()+
+  geom_density(aes(x = timeOfDay, fill = weekend), alpha = .5, color = NA)+
+  facet_wrap(~client)+
+  labs(title = NULL,
+       x = "Time Of Day in 24 hour",
+       y = NULL)
 ```
   
 ### Spatial patterns
