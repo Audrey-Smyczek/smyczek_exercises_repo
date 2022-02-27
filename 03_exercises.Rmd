@@ -233,7 +233,6 @@ Trips %>%
 The variable `client` describes whether the renter is a regular user (level `Registered`) or has not joined the bike-rental organization (`Causal`). The next set of exercises investigate whether these two different categories of users show different rental behavior and how `client` interacts with the patterns you found in the previous exercises. 
 
   11. Change the graph from exercise 10 to set the `fill` aesthetic for `geom_density()` to the `client` variable. You should also set `alpha = .5` for transparency and `color=NA` to suppress the outline of the density function.
-  
 
 ```{r}
 Trips %>% 
@@ -318,7 +317,11 @@ Small_Trips %>%
   ggplot()+
   geom_point(mapping = aes(x = `lat`, 
                            y = `long`,
-                           color = `num_departures`))
+                           color = `num_departures`))+
+    labs(title = "Map of Stations based on Longitude and Latitude Positioning",
+       x = "Longitude",
+       y = "Latitude")+
+  theme(plot.title = element_text(hjust = 0.5))
 ```
   
   16. Only 14.4% of the trips in our data are carried out by casual users. Create a plot that shows which area(s) have stations with a much higher percentage of departures by casual users. What patterns do you notice? (Again, we'll improve this next week when we learn about maps).
@@ -339,7 +342,7 @@ In this section, we'll use the data from 2022-02-01 Tidy Tuesday. If you didn't 
 
   17. The final product of this exercise will be a graph that has breed on the y-axis and the sum of the numeric ratings in the `breed_traits` dataset on the x-axis, with a dot for each rating. First, create a new dataset called `breed_traits_total` that has two variables -- `Breed` and `total_rating`. The `total_rating` variable is the sum of the numeric ratings in the `breed_traits` dataset (we'll use this dataset again in the next problem). Then, create the graph just described. Omit Breeds with a `total_rating` of 0 and order the Breeds from highest to lowest ranked. You may want to adjust the `fig.height` and `fig.width` arguments inside the code chunk options (eg. `{r, fig.height=8, fig.width=4}`) so you can see things more clearly - check this after you knit the file to assure it looks like what you expected.
 
-```{r, fig.height=9, fig.width=4}
+```{r, fig.height=10, fig.width=4}
 breed_traits_total <- breed_traits %>% 
   mutate(total_rating = (`Affectionate With Family`  + `Good With Young Children` + `Good With Other Dogs` + `Shedding Level` + `Coat Grooming Frequency` + `Drooling Level`+ `Openness To Strangers`+ `Playfulness Level` + `Watchdog/Protective Nature` + `Adaptability Level` + `Trainability Level` + `Mental Stimulation Needs` + `Energy Level` + `Barking Level`)/14) %>% 
   select(`Breed`, `total_rating`) %>% 
@@ -348,22 +351,40 @@ breed_traits_total <- breed_traits %>%
 breed_traits_total %>%
   ggplot()+
   geom_point(mapping = aes(x = `total_rating`, 
-                           y = fct_reorder(`Breed`, `total_rating`, max)))
+                           y = fct_reorder(`Breed`, `total_rating`, max)),
+             color = "red")+
+  labs(title = "Total Ranking of Dog Traits vs. Breeds",
+       x = "Total Ranking",
+       y = NULL)+
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
-  18. The final product of this exercise will be a graph with the top-20 dogs in total ratings (from previous problem) on the y-axis, year on the x-axis, and points colored by each breed's ranking for that year (from the `breed_rank_all` dataset). The points within each breed will be connected by a line, and the breeds should be arranged from the highest median rank to lowest median rank ("highest" is actually the smallest numer, eg. 1 = best). After you're finished, think of AT LEAST one thing you could you do to make this graph better. HINTS: 1. Start with the `breed_rank_all` dataset and pivot it so year is a variable. 2. Use the `separate()` function to get year alone, and there's an extra argument in that function that can make it numeric. 3. For both datasets used, you'll need to `str_squish()` Breed before joining. 
+  18. The final product of this exercise will be a graph with the top-20 dogs in total ratings (from previous problem) on the y-axis, year on the x-axis, and points colored by each breed's ranking for that year (from the `breed_rank_all` dataset). The points within each breed will be connected by a line, and the breeds should be arranged from the highest median rank to lowest median rank ("highest" is actually the smallest number, eg. 1 = best). After you're finished, think of AT LEAST one thing you could you do to make this graph better. HINTS: 1. Start with the `breed_rank_all` dataset and pivot it so year is a variable. 2. Use the `separate()` function to get year alone, and there's an extra argument in that function that can make it numeric. 3. For both datasets used, you'll need to `str_squish()` Breed before joining. 
   
-  Make it only 20
-  JOINING
-  
+I added a graph title and changed the axis-labels to make the graph more understanable.
+
 ```{r}
 breed_rank_all %>% 
+  left_join(breed_traits_total) %>% 
+  arrange(desc(`total_rating`)) %>% 
+  slice(1:20) %>% 
   pivot_longer(cols= starts_with("20"),
                names_to = "year",
                values_to = "ranking") %>% 
   separate(year,
            c("year"),
-           convert = TRUE) 
+           convert = TRUE) %>% 
+  group_by(`Breed`) %>% 
+  mutate(median_rank = median(`ranking`, na.rm = TRUE)) %>% 
+  select(`Breed`, `total_rating`, `year`, `ranking`, `median_rank`) %>% 
+  arrange(`median_rank`) %>% 
+  ggplot()+
+  geom_point(aes(x=`year`, y=fct_reorder(`Breed`, `median_rank`, .desc=TRUE), color=`ranking`))+
+  geom_line(mapping = aes(x=`year`, y=`Breed`))+
+  labs(title = "Rank by Year vs. Dog Breed",
+       x = "Year",
+       y = "Dog Breed, ordered by Median Rank from High to Low")+
+  theme(plot.title = element_text(hjust = 0.5))
   
 ```
   
