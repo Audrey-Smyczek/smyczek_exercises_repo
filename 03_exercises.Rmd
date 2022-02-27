@@ -80,7 +80,6 @@ These exercises will reiterate what you learned in the "Expanding the data wrang
 
   1. Summarize the `garden_harvest` data to find the total harvest weight in pounds for each vegetable and day of week (HINT: use the `wday()` function from `lubridate`). Display the results so that the vegetables are rows but the days of the week are columns.
   
-  
 ```{r}
 garden_harvest %>% 
   select(`vegetable`, `weight`, `date`) %>% 
@@ -108,16 +107,14 @@ DO THIS
 
   4. Subset the data to tomatoes. Reorder the tomato varieties from smallest to largest first harvest date. Create a barplot of total harvest in pounds for each variety, in the new order. CHALLENGE: add the date near the end of the bar. (This is probably not a super useful graph because it's difficult to read. This is more an exercise in using some of the functions you just learned.)
   
-Put in lbs, use geom_col, put weight on x, variety on y
-
 ```{r}
 garden_harvest %>% 
   filter(vegetable == "tomatoes") %>% 
   group_by(`variety`) %>% 
   summarise(date = min(`date`),
-            sum_weight = sum(weight)) %>% 
-  ggplot(aes(x=`sum_weight`, fill = `variety`))+
-  geom_bar()
+            sum_weight = sum(weight) * 0.00220462) %>% 
+  ggplot(aes(x=`sum_weight`, y=`variety`, fill = `variety`))+
+  geom_col()
 
 ```
 
