@@ -93,11 +93,15 @@ garden_harvest %>%
 
   2. Summarize the `garden_harvest` data to find the total harvest in pound for each vegetable variety and then try adding the plot from the `garden_planting` table. This will not turn out perfectly. What is the problem? How might you fix it?
 
-NEED TO ADD TO TABLE
+The problem is that not all of the vegetables there were planted were harvested, so for some of the vegetable varieties, there is NA in cumulative weight. If the user only want to see the vegetable varieties that were harvested, then the data could be filtered for `cum_lbs` for all values not equal to NA.
+
 ```{r}
-garden_harvest %>% 
+sum_harvest <-garden_harvest %>% 
   group_by(`variety`, `vegetable`) %>% 
   summarise(cum_lbs = max(cumsum(weight) * 0.00220462))
+
+garden_planting %>% 
+  left_join(sum_harvest)
 
 ```
 
