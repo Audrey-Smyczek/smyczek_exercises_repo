@@ -361,7 +361,7 @@ breed_traits_total %>%
 
   18. The final product of this exercise will be a graph with the top-20 dogs in total ratings (from previous problem) on the y-axis, year on the x-axis, and points colored by each breed's ranking for that year (from the `breed_rank_all` dataset). The points within each breed will be connected by a line, and the breeds should be arranged from the highest median rank to lowest median rank ("highest" is actually the smallest number, eg. 1 = best). After you're finished, think of AT LEAST one thing you could you do to make this graph better. HINTS: 1. Start with the `breed_rank_all` dataset and pivot it so year is a variable. 2. Use the `separate()` function to get year alone, and there's an extra argument in that function that can make it numeric. 3. For both datasets used, you'll need to `str_squish()` Breed before joining. 
   
-I added a graph title and changed the axis-labels to make the graph more understanable.
+I added a graph title and changed the axis-labels to make the graph more understandable.
 
 ```{r}
 breed_rank_all %>% 
@@ -385,13 +385,26 @@ breed_rank_all %>%
        x = "Year",
        y = "Dog Breed, ordered by Median Rank from High to Low")+
   theme(plot.title = element_text(hjust = 0.5))
-  
 ```
   
   19. Create your own! Requirements: use a `join` or `pivot` function (or both, if you'd like), a `str_XXX()` function, and a `fct_XXX()` function to create a graph using any of the dog datasets. One suggestion is to try to improve the graph you created for the Tidy Tuesday assignment. If you want an extra challenge, find a way to use the dog images in the `breed_rank_all` file - check out the `ggimage` library and [this resource](https://wilkelab.org/ggtext/) for putting images as labels.
-  
-```{r}
 
+  
+```{r, fig.height=3, fig.width=2}
+breed_rank_all %>% 
+  left_join(`breed_traits_total`) %>% 
+  mutate(breed_len = str_length(`Breed`)) %>% 
+  arrange(`breed_len`) %>% 
+  slice(1:50) %>% 
+  ggplot()+
+    geom_point(mapping = aes(x=`total_rating`,
+                             y=fct_reorder(`Breed`, 
+                                           `breed_len`)),
+               color = "blue")+
+  labs(x="Average Rating of Dog Breeds",
+       y = "Breed Names",
+       title="Average Rating vs. Dog Breeds")+
+  theme(plot.title = element_text(hjust = 0.5))
 ```
   
 ## GitHub link
